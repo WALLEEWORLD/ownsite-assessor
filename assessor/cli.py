@@ -24,14 +24,17 @@ if str(ROOT) not in sys.path:
 from assessor import __disclaimer__, __version__  # noqa: E402
 from assessor.http_client import AssessorClient  # noqa: E402
 from assessor.modules import (  # noqa: E402
+    access_control_abuse,
     auth_gates,
     dns_check,
     headers_check,
     origin_exposure,
+    pentest_playbook,
     ports_check,
     robots_check,
     tech_check,
     tls_check,
+    unauthorized_client,
 )
 from assessor.report import (  # noqa: E402
     collect_findings,
@@ -179,6 +182,9 @@ def main(argv: list[str] | None = None) -> int:
             "origin_exposure": True,
             "ports": True,
             "robots_security_txt": True,
+            "unauthorized_client": True,
+            "access_control_abuse": True,
+            "pentest_playbook": True,
         }
     )
     timeout = float(scan.get("request_timeout_seconds") or 10)
@@ -291,6 +297,42 @@ def main(argv: list[str] | None = None) -> int:
             ports=ports or None,
             mode=port_mode,
             workers=port_workers,
+        )
+
+    # Unauthorized device / client simulation (authorized pentest-style)
+    if modules_cfg.get("unauthorized_client", True):
+        console.print("[bold]• Unauthorized device simulation[/bold]")
+        report["modules"]["unauthorized_client"] = unauthorized_client.run(
+            scheme,
+            host,
+            protected,
+            timeout=timeout,
+        )
+
+    # Access-control abuse cases (spoof headers, path confusion, CORS)
+    if modules_cfg.get("access_control_abuse", True):
+        console.print("[bold]• Access-control abuse simulation[/bold]")
+        extra = list(target.get("unauthorized_probe_paths") or [])
+        report["modules"]["access_control_abuse"] = access_control_abuse.run(
+            scheme,
+            host,
+            protected,
+            timeout=timeout,
+            cors_test_origin=str(
+                scan.get("cors_test_origin") or "https://unauthorized-device.example"
+            ),
+            extra_probe_paths=extra,
+        )
+
+    # Pentest playbook (checklist only)
+    if modules_cfg.get("pentest_playbook", True):
+        console.print("[bold]• Authorized pentest playbook[/bold]")
+        report["modules"]["pentest_playbook"] = pentest_playbook.run(
+            host,
+            scheme,
+            protected,
+            public,
+            alt_hosts=alt_hosts,
         )
 
     findings = collect_findings(report)

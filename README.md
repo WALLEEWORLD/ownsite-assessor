@@ -544,6 +544,45 @@ Provided as-is for defensive security engineering and authorized self-assessment
 
 ---
 
+
+
+---
+
+## Unauthorized device & access-control pentest simulation (v1.1)
+
+These modules mimic how a **real authorized penetration test** validates that
+**unknown / non-authorized clients** cannot reach private resources.
+
+| Module | What it simulates |
+|--------|-------------------|
+| `unauthorized_client` | Multiple device UAs (desktop, iOS, Android, curl, empty UA) with **no credentials**; invalid Bearer/session shapes; unauthenticated HTTP method matrix |
+| `access_control_abuse` | Spoofable headers (`X-Forwarded-For`, `X-Original-URL`, …), path normalization tricks, CORS from an unauthorized origin, cacheability, Host-header redirect issues |
+| `pentest_playbook` | Phased engagement checklist (ROE → recon → anonymous client → session boundaries → edge/origin → manual WSTG → report) |
+
+### What this is
+
+- Authorized **access-control** testing of **your** app
+- Answers: “If a random device on the internet hits my private routes, are they blocked?”
+- Safe probes only (no password spraying, no exploit payloads, no weaponized bypass kits)
+
+### What this is not
+
+- Not a license to test third-party systems
+- Not RCE/SQLi/XSS exploit automation
+- Not credential stuffing or token cracking
+
+### Run
+
+```bash
+./scripts/run_assessment.sh --host staging.yourdomain.com --i-am-authorized
+```
+
+Ensure `target.auth_protected_paths` lists routes that must reject strangers.
+Optional: `target.unauthorized_probe_paths` for extra API/admin aliases.
+
+Reports include **Unauthorized Device Simulation** and **Access-Control Abuse**
+sections plus a full **Authorized Pentest Playbook** checklist.
+
 ## Docs
 
 | Doc | Description |

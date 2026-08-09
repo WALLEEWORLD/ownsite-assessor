@@ -28,6 +28,13 @@ target:
     - "/"
     - "/health"
     - "/.well-known/security.txt"
+  # Extra routes to hit with zero credentials (APIs, admin aliases, etc.)
+  unauthorized_probe_paths:
+    - "/api/me"
+    - "/api/user"
+    - "/api/v1/admin"
+    - "/manage"
+    - "/console"
   # If you have a session cookie for authenticated baseline checks, set it here.
   # Prefer env var OWNSITE_SESSION_COOKIE over committing secrets.
   # session_cookie: "session=..."

@@ -84,3 +84,16 @@ Pipeline adds (if installed): nmap web ports, httpx, nuclei (`info,low` only), t
 - Scan third-party assets
 
 For deep app testing of **your** code, pair with OWASP ZAP/Burp manual review and OWASP WSTG — still only in scope.
+
+
+## Unauthorized device simulation
+
+Enabled by default (`unauthorized_client`, `access_control_abuse`, `pentest_playbook`).
+
+```bash
+./scripts/run_assessment.sh -c configs/my-site.yaml
+```
+
+Uses clean clients (no valid session) across device profiles to verify private
+routes challenge or deny access — the same class of checks used in authorized
+penetration tests for access control. No exploit payloads.

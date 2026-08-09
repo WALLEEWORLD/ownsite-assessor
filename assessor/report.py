@@ -118,6 +118,51 @@ def write_markdown(report: dict[str, Any], path: Path) -> None:
             )
         lines.append("")
 
+    if "unauthorized_client" in mods:
+        lines.append("## Unauthorized Device Simulation")
+        lines.append("")
+        uc = mods["unauthorized_client"]
+        dm = uc.get("device_matrix") or []
+        challenged = sum(1 for r in dm if r.get("auth_challenge"))
+        openish = sum(1 for r in dm if r.get("appears_authorized_content"))
+        lines.append(f"- Device×path probes: {len(dm)}")
+        lines.append(f"- Auth challenges observed: {challenged}")
+        lines.append(f"- App-content-without-auth signals: {openish}")
+        inv = uc.get("invalid_credential_matrix") or []
+        if inv:
+            lines.append("- Invalid credential variants:")
+            for row in inv:
+                lines.append(
+                    f"  - `{row.get('variant')}` → status={row.get('status_code')} "
+                    f"challenge={row.get('auth_challenge')}"
+                )
+        lines.append("")
+
+    if "access_control_abuse" in mods:
+        lines.append("## Access-Control Abuse Simulation")
+        lines.append("")
+        ac = mods["access_control_abuse"]
+        lines.append(f"- Spoof-header cases: {len(ac.get('spoof_headers') or [])}")
+        lines.append(f"- Path-confusion probes: {len(ac.get('path_confusion') or [])}")
+        lines.append(f"- CORS probes: {len(ac.get('cors') or [])}")
+        bypass = [
+            r for r in (ac.get("spoof_headers") or [])
+            if r.get("possible_bypass_signal")
+        ]
+        if bypass:
+            lines.append(f"- Possible bypass signals: {len(bypass)}")
+        lines.append("")
+
+    if "pentest_playbook" in mods:
+        lines.append("## Authorized Pentest Playbook")
+        lines.append("")
+        for phase in mods["pentest_playbook"].get("phases") or []:
+            lines.append(f"### Phase {phase.get('phase')}: {phase.get('name')}")
+            lines.append("")
+            for c in phase.get("checks") or []:
+                lines.append(f"- [ ] {c}")
+            lines.append("")
+
     lines.append("## Findings")
     lines.append("")
     if not findings:
