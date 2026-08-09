@@ -1,0 +1,67 @@
+# OwnSite Assessor — target configuration
+# ONLY point this at systems you own or have written authorization to test.
+
+target:
+  # Primary hostname (required)
+  host: "staging.example.com"
+  # Optional alternate hosts / apex / www / API
+  alt_hosts:
+    - "example.com"
+    - "www.example.com"
+    - "api.example.com"
+  # Scheme preference
+  scheme: "https"
+  # Custom ports to check (in addition to 80/443)
+  ports:
+    - 80
+    - 443
+    - 8080
+    - 8443
+  # Optional path prefixes that should require auth
+  auth_protected_paths:
+    - "/admin"
+    - "/dashboard"
+    - "/api/private"
+    - "/internal"
+  # Paths that should be publicly reachable (health checks, etc.)
+  public_paths:
+    - "/"
+    - "/health"
+    - "/.well-known/security.txt"
+  # If you have a session cookie for authenticated baseline checks, set it here.
+  # Prefer env var OWNSITE_SESSION_COOKIE over committing secrets.
+  # session_cookie: "session=..."
+
+authorization:
+  # Required: confirm you are authorized
+  i_own_or_have_written_permission: false
+  # Short note stored in the report for audit trail
+  engagement_note: "Self-assessment of my staging environment"
+  # Contact for findings
+  contact: "security@example.com"
+
+scan:
+  # Be polite — this is your site
+  request_timeout_seconds: 10
+  max_redirects: 5
+  user_agent: "OwnSiteAssessor/1.0 (+authorized-self-test)"
+  # DNS / TLS / headers / auth-gate / origin-leak / ports
+  modules:
+    dns: true
+    tls: true
+    headers: true
+    tech: true
+    auth_gates: true
+    origin_exposure: true
+    ports: true
+    robots_security_txt: true
+  # Port scan mode: "common" (fast) or "extended" (more ports, still non-aggressive)
+  port_mode: "web"
+  # Concurrent workers for port checks
+  port_workers: 32
+
+report:
+  output_dir: "assessor/reports"
+  formats:
+    - json
+    - markdown
